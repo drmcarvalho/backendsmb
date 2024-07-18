@@ -2,10 +2,6 @@
 
 namespace App\Controllers;
 
-//header('Access-Control-Allow-Origin: *');
-//header('Access-Control-Allow-Headers: *');
-//header("Access-Control-Allow-Methods: GET, OPTIONS, POST, PUT, DELETE");
-
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\HTTP\IncomingRequest;
 
@@ -19,6 +15,22 @@ class Pessoa extends ResourceController
         $sql = "select id, nome, telefone, email, data_nascimento as datanascimento, TIMESTAMPDIFF(YEAR, data_nascimento, CURDATE()) AS idade from Pessoas ";        
         $query = $db->query($sql);
         return $this->respond($query->getResult());
+    }
+
+    public function upload($id)
+    {
+        $request = request();
+        $img = $request->getFile('arquivo');      
+        if (!empty($img)) 
+        {
+            $data = file_get_contents($img->getTempName());
+            if ($data) 
+            {
+                $db = \Config\Database::connect();
+                $sql = 'update pessoas set imagem = ? where id = ?';
+                $db->query($sql, [$data, $id]);
+            }
+        }        
     }
 
     public function show($segment=null, $term=null, $datanascimento1=null) 
@@ -104,13 +116,12 @@ class Pessoa extends ResourceController
         if (!property_exists($payload, 'datanascimento') || empty($payload->datanascimento)) 
         {
             return $this->respond(self::mensagemPropRequerida('datanascimento'));
-        }
+        }            
 
-        $db = \Config\Database::connect();        
-        $sql = "insert into Pessoas (nome, telefone, email, data_nascimento) values (?, ?, ?, ?)";        
+        $db = \Config\Database::connect();
+        $sql = "insert into Pessoas (nome, telefone, email, data_nascimento) values (?, ?, ?, ?)";
         $db->query($sql, [$payload->nome, $payload->telefone, $payload->email, $payload->datanascimento]);
-
-        return $this->respond(['create' => $payload->nome]);
+        return $this->respond(['pessoaId' => $db->insertID()]);
     }
 
     public function delete($id=null) 

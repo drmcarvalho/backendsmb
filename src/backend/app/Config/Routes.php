@@ -8,10 +8,10 @@ use App\Controllers\Pessoa;
  */
 $routes->group('', ['filter' => 'cors'], static function (RouteCollection $routes): void {
     $routes->resource('pessoas', ['namespace' => '', 'controller' => Pessoa::class]);
-
-    $routes->options('pessoas', static function () {
-        // Implement processing for normal non-preflight OPTIONS requests,
-        // if necessary.
+    
+    //$routes->post('/pessoas/upload/(:segment)', 'Pessoa::upload/$1');    
+    
+    $routes->options('pessoas', static function () {        
         $response = response();
         $response->setStatusCode(204);
         $response->setHeader('Allow:', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
@@ -19,5 +19,15 @@ $routes->group('', ['filter' => 'cors'], static function (RouteCollection $route
         return $response;
     });
 
+    /*$routes->options('upload', static function () {        
+        $response = response();
+        $response->setStatusCode(204);
+        $response->setHeader('Allow:', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
+
+        return $response;
+    }); */
+
     $routes->options('pessoas/(:any)', static function () {});
+
+    //$routes->options('upload/(:any)', static function () {});
 });
